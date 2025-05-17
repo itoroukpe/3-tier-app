@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: devdb
+      MONGO_INITDB_ROOT_PASSWORD: devdb1234
+    volumes:
+      - db_data:/data/db
+    networks:
+      - appnet
+
+  backend:
+    build: ./backend
+    container_name: springapp
+    ports:
+      - "8080:8080"
+    environment:
+      - MONGO_DB_HOSTNAME=mongodb
+      - MONGO_DB_USERNAME=devdb
+      - MONGO_DB_PASSWORD=devdb1234
+    depends_on:
+      - mongo
+    networks:
+      - appnet
+
+  frontend:
+    image: nginx:alpine
+    container_name: frontend
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    networks:
+      - appnet
+
+volumes:
+  db_data:
+
+networks:
+  appnet:
